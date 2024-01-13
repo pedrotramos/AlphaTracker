@@ -1,0 +1,28 @@
+stages:
+  - build
+  - deploy
+
+build:
+  image: node:latest
+  stage: build
+  script:
+    - export REACT_APP_API_URL=$API_URL
+    - export REACT_APP_API_PORT=$API_PORT
+    - export REACT_APP_API_AUTH_USERNAME=$API_AUTH_USERNAME
+    - export REACT_APP_API_AUTH_PASSWORD=$API_AUTH_PASSWORD
+    - npm install
+    - yarn build
+  artifacts:
+    paths:
+      - build/
+
+pages:
+  image: alpine:latest
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - mv build public         
+  artifacts:
+    paths:
+      - public
