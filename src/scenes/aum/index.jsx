@@ -1,8 +1,8 @@
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import BeachAccessOutlinedIcon from "@mui/icons-material/BeachAccessOutlined";
-import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
-import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import StarIcon from "@mui/icons-material/Star";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
+import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Box, Skeleton, Typography, useTheme } from "@mui/material";
@@ -12,38 +12,21 @@ import AumPieChart from "../../components/AumPieChart";
 import AumStatBox from "../../components/AumStatBox";
 import { tokens } from "../../theme";
 import Header from "../global/Header";
-
-const url = process.env.REACT_APP_API_URL;
-const port = process.env.REACT_APP_API_PORT;
-const username = process.env.REACT_APP_API_AUTH_USERNAME;
-const password = process.env.REACT_APP_API_AUTH_PASSWORD;
-
-async function getFromAPI(endpoint) {
-  var credentials = btoa(username + ":" + password);
-  var auth = { Authorization: `Basic ${credentials}` };
-  var data = await fetch(url + ":" + port + endpoint, {
-    headers: auth,
-  }).then((res) => res.json());
-  return data;
-}
+import { faker } from "@faker-js/faker";
 
 function genAumAumStatBoxes(data, colors, theme) {
   const icons = {
-    DEFENDER: (
+    SHIELD: (
       <ShieldOutlinedIcon
         sx={{ color: colors.blueAccent[600], fontSize: "32px" }}
       />
     ),
-    "DEFENDER PREV": (
-      <BeachAccessOutlinedIcon
+    ROCKET: (
+      <RocketLaunchIcon
         sx={{ color: colors.blueAccent[600], fontSize: "32px" }}
       />
     ),
-    MULTIFACTOR: (
-      <HubOutlinedIcon
-        sx={{ color: colors.blueAccent[600], fontSize: "32px" }}
-      />
-    ),
+    STAR: <StarIcon sx={{ color: colors.blueAccent[600], fontSize: "32px" }} />,
     TOTAL: (
       <SavingsOutlinedIcon
         sx={{ color: colors.blueAccent[600], fontSize: "32px" }}
@@ -140,7 +123,74 @@ const Aum = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiData = await getFromAPI("/aums");
+      var apiData = {
+        current: [
+          {
+            family_name: "ROCKET",
+            aum: faker.number.int({ min: 170000000, max: 200000000 }),
+            pct_change: faker.number.float({ min: -0.1, max: 0.1 }),
+          },
+          {
+            family_name: "SHIELD",
+            aum: faker.number.int({ min: 30000000, max: 40000000 }),
+            pct_change: faker.number.float({ min: -0.1, max: 0.1 }),
+          },
+          {
+            family_name: "STAR",
+            aum: faker.number.int({ min: 10000000, max: 20000000 }),
+            pct_change: faker.number.float({ min: -0.1, max: 0.1 }),
+          },
+        ],
+      };
+      apiData.current.push({
+        family_name: "TOTAL",
+        aum: apiData.current.reduce((total, fund) => total + fund.aum, 0),
+        pct_change:
+          apiData.current.reduce(
+            (total, fund) => total + fund.pct_change * fund.aum,
+            0
+          ) / apiData.current.reduce((total, fund) => total + fund.aum, 0),
+      });
+
+      const totalAum = apiData.current
+        .filter((f) => f.family_name !== "TOTAL")
+        .reduce((total, fund) => total + fund.aum, 0);
+      apiData.shares = apiData.current
+        .filter((f) => f.family_name !== "TOTAL")
+        .map((fund) => ({
+          family_name: fund.family_name,
+          share: (fund.aum / totalAum) * 100,
+        }));
+
+      const generateMonthlyHistory = () => {
+        return Array.from({ length: 12 }, (_, i) => {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          date.setDate(1);
+          if (i === 0) {
+            date.setDate(new Date().getDate());
+          }
+          return {
+            date: `${(date.getMonth() + 1)
+              .toString()
+              .padStart(2, "0")}/${date.getFullYear()}`,
+            ROCKET:
+              i === 0
+                ? apiData.current.find((f) => f.family_name === "ROCKET").aum
+                : faker.number.int({ min: 170000000, max: 200000000 }),
+            SHIELD:
+              i === 0
+                ? apiData.current.find((f) => f.family_name === "SHIELD").aum
+                : faker.number.int({ min: 30000000, max: 40000000 }),
+            STAR:
+              i === 0
+                ? apiData.current.find((f) => f.family_name === "STAR").aum
+                : faker.number.int({ min: 10000000, max: 20000000 }),
+          };
+        }).reverse();
+      };
+
+      apiData.history = generateMonthlyHistory();
       setData(apiData);
     };
     fetchData();
@@ -349,7 +399,7 @@ const Aum = () => {
               sx={{ marginLeft: "5px" }}
             />
             <Box marginTop="15px">
-              <AumBarChart data={undefined} />
+              <AumBarChart data={data} />
             </Box>
           </Box>
           <Box
@@ -388,7 +438,7 @@ const Aum = () => {
               alignItems="center"
               marginTop="15px"
             >
-              <AumPieChart data={undefined} />
+              <AumPieChart data={data} />
             </Box>
           </Box>
         </Box>

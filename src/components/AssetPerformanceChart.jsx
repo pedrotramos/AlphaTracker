@@ -2,51 +2,52 @@ import { ResponsiveLine } from "@nivo/line";
 import { Box, Skeleton, useTheme } from "@mui/material";
 import { tokens } from "../theme";
 import CircleIcon from "@mui/icons-material/Circle";
-import { useState, useEffect } from "react";
-
-const url = process.env.REACT_APP_API_URL;
-const port = process.env.REACT_APP_API_PORT;
-const username = process.env.REACT_APP_API_AUTH_USERNAME;
-const password = process.env.REACT_APP_API_AUTH_PASSWORD;
-
-async function getPerfHistory(endpoint, ticker_code, equity_id) {
-  var credentials = btoa(username + ":" + password);
-  var auth = { Authorization: `Basic ${credentials}` };
-  var data = await fetch(
-    url +
-      ":" +
-      port +
-      endpoint +
-      "?ticker_code=" +
-      ticker_code +
-      "&equity_id=" +
-      equity_id,
-    {
-      headers: auth,
-    }
-  ).then((res) => res.json());
-  return data;
-}
+import { useState } from "react";
+import { faker } from "@faker-js/faker";
 
 const AssetPerformanceChart = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [queried, setQueried] = useState(props["queried"]);
-  const [perfHistory, setPerfHistory] = useState(undefined);
 
-  useEffect(() => {
-    const fetchData = async (ticker, equity_id) => {
-      var perf = await getPerfHistory("/asset-return", ticker, equity_id);
-      setPerfHistory(perf);
+  if (!queried) {
+    if (typeof props !== "undefined") {
       setQueried(true);
-    };
-    if (!queried) {
-      if (typeof props !== "undefined") {
-        fetchData(props["ticker_code"], props["equity_id"]);
-      }
     }
-  }, [props, queried]);
-  if (typeof perfHistory === "undefined") {
+  }
+
+  const generatePerfHistory = () => {
+    let cumulativeReturn = 0;
+    return [
+      {
+        id: "Performance",
+        data: Array.from({ length: 5 * 365 }, (_, i) => {
+          const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+          if (date instanceof Date && !isNaN(date)) {
+            // Ensure date is valid
+            date.setMilliseconds(0);
+            const dailyReturn = faker.number.float({
+              min: -0.1,
+              max: 0.1,
+              precision: 0.0001,
+            });
+            cumulativeReturn += dailyReturn;
+            return {
+              x: date.toISOString().split("T")[0],
+              y: cumulativeReturn.toFixed(4),
+            };
+          }
+          return null; // Return null if date is invalid
+        })
+          .filter((entry) => entry !== null) // Filter out null entries
+          .reverse(),
+      },
+    ];
+  };
+
+  const perfHistory = generatePerfHistory();
+
+  if (!perfHistory || perfHistory.length === 0) {
     return (
       <Skeleton
         variant="rectangular"
@@ -106,7 +107,7 @@ const AssetPerformanceChart = (props) => {
         margin={{ top: 50, right: 50, bottom: 70, left: 70 }}
         xScale={{
           type: "time",
-          format: "%Y-%m-%dT%H:%M:%S",
+          format: "%Y-%m-%d",
           precision: "day",
         }}
         yScale={{
@@ -126,12 +127,12 @@ const AssetPerformanceChart = (props) => {
           tickSize: 0,
           tickPadding: 5,
           tickRotation: 45,
-          legend: "Date", // added
+          legend: "Date",
           legendOffset: 56,
           legendPosition: "middle",
         }}
         axisLeft={{
-          format: (value) => `${(value * 100).toExponential()}%`,
+          format: (value) => `${(value * 100).toFixed(2)}%`,
           orient: "left",
           tickValues: 5,
           tickSize: 3,
@@ -168,32 +169,6 @@ const AssetPerformanceChart = (props) => {
             </div>
           );
         }}
-        legends={[
-          {
-            anchor: "top",
-            direction: "row",
-            justify: false,
-            translateX: 0,
-            translateY: -40,
-            itemsSpacing: 20,
-            itemDirection: "top-to-bottom",
-            itemWidth: 80,
-            itemHeight: 20,
-            itemOpacity: 0.75,
-            symbolSize: 8,
-            symbolShape: "square",
-            symbolBorderColor: "rgba(0, 0, 0, .5)",
-            effects: [
-              {
-                on: "hover",
-                style: {
-                  itemBackground: "rgba(0, 0, 0, .03)",
-                  itemOpacity: 1,
-                },
-              },
-            ],
-          },
-        ]}
       />
     );
   }

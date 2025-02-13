@@ -1,5 +1,5 @@
-import BeachAccessOutlinedIcon from "@mui/icons-material/BeachAccessOutlined";
-import HubOutlinedIcon from "@mui/icons-material/HubOutlined";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import StarIcon from "@mui/icons-material/Star";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -10,20 +10,7 @@ import LivePerformanceChart from "../../components/LivePerformanceChart";
 import { tokens } from "../../theme";
 import Header from "../global/Header";
 import { Skeleton, Typography } from "@mui/material";
-
-const url = process.env.REACT_APP_API_URL;
-const port = process.env.REACT_APP_API_PORT;
-const username = process.env.REACT_APP_API_AUTH_USERNAME;
-const password = process.env.REACT_APP_API_AUTH_PASSWORD;
-
-async function getFromAPI(endpoint) {
-  var credentials = btoa(username + ":" + password);
-  var auth = { Authorization: `Basic ${credentials}` };
-  var data = await fetch(url + ":" + port + endpoint, {
-    headers: auth,
-  }).then((res) => res.json());
-  return data;
-}
+import { faker } from "@faker-js/faker";
 
 function genFundBoxes(data, colors, theme) {
   var bgRed =
@@ -35,21 +22,17 @@ function genFundBoxes(data, colors, theme) {
       ? colors.greenAccent[600]
       : colors.greenAccent[500];
   const icons = {
-    DEFENDER: (
+    SHIELD: (
       <ShieldOutlinedIcon
         sx={{ color: colors.blueAccent[600], fontSize: "26px" }}
       />
     ),
-    "DEFENDER PREV": (
-      <BeachAccessOutlinedIcon
+    ROCKET: (
+      <RocketLaunchIcon
         sx={{ color: colors.blueAccent[600], fontSize: "26px" }}
       />
     ),
-    MULTIFACTOR: (
-      <HubOutlinedIcon
-        sx={{ color: colors.blueAccent[600], fontSize: "26px" }}
-      />
-    ),
+    STAR: <StarIcon sx={{ color: colors.blueAccent[600], fontSize: "26px" }} />,
   };
   var boxes = [];
   Object.keys(data).forEach(function (key, idx) {
@@ -179,42 +162,98 @@ const LivePerformance = () => {
   useEffect(() => {
     const fetchData = async () => {
       // Get fund data
-      var ts;
-      const fundData = await getFromAPI("/funds");
-      var fundMetrics = {};
-      for (var i = 0; i < fundData.length; i++) {
-        if (!(fundData[i]["family_name"] in fundMetrics)) {
-          fundMetrics[fundData[i]["family_name"]] = {};
-        }
-        fundMetrics[fundData[i]["family_name"]][fundData[i]["return_scope"]] =
-          fundData[i]["return"];
-        ts = fundData[i]["timestamp"];
-      }
-      ts = new Date(ts);
-      const tz_offset = ts.getTimezoneOffset() * 60 * 1000;
-      ts.setTime(ts.getTime() - tz_offset);
-      setTimestamp(ts.toLocaleString("pt-BR"));
+      const currentTimestamp = new Date();
+      const formattedTimestamp = `${String(currentTimestamp.getDate()).padStart(
+        2,
+        "0"
+      )}/${String(currentTimestamp.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${currentTimestamp.getFullYear()} ${String(
+        currentTimestamp.getHours()
+      ).padStart(2, "0")}:${String(currentTimestamp.getMinutes()).padStart(
+        2,
+        "0"
+      )}:${String(currentTimestamp.getSeconds()).padStart(2, "0")}`;
+      setTimestamp(formattedTimestamp);
+      const fundMetrics = {};
+      const fundNames = ["ROCKET", "SHIELD", "STAR"];
+      const fundLongWeight = { ROCKET: 1, SHIELD: 0.5, STAR: 0.7 };
+      fundNames.forEach((name) => {
+        const short = faker.number.float({ min: -0.05, max: 0.05 });
+        const long = faker.number.float({ min: -0.05, max: 0.05 });
+        const total =
+          fundLongWeight[name] * long + (1 - fundLongWeight[name]) * short;
+        const expected =
+          total * (1 + faker.number.float({ min: -0.05, max: 0.05 }));
+        fundMetrics[name] = {
+          long: fundLongWeight[name] * long,
+          short: (1 - fundLongWeight[name]) * short,
+          expected: expected,
+          total: total,
+        };
+      });
       setFundsData(fundMetrics);
 
       // Get factor data
-      const factorData = await getFromAPI("/factors");
+      const factorNames = [
+        "MARKET",
+        "MOMENTUM",
+        "QUALITY",
+        "SIZE",
+        "VALUE",
+        "VOLATILTY",
+      ];
       var factorMetrics = {};
-      for (i = 0; i < factorData.length; i++) {
-        if (!(factorData[i]["factor_name"] in factorMetrics)) {
-          factorMetrics[factorData[i]["factor_name"]] = {};
-        }
-        factorMetrics[factorData[i]["factor_name"]] = factorData[i]["return"];
-      }
+      factorNames.forEach((name) => {
+        const value = faker.number.float({ min: -0.1, max: 0.1 });
+        factorMetrics[name] = value;
+      });
       setFactorData(factorMetrics);
 
       // Get timeseries data
       if (!mobile) {
-        const timeseriesData = await getFromAPI("/timeseries");
+        const timeseriesData = [...fundNames, "MARKET"].map((name) => ({
+          id: name,
+          data: [],
+        }));
+
+        const currentHour = currentTimestamp.getHours();
+        const currentMinute = currentTimestamp.getMinutes();
+
+        // Calculate the number of 5-minute intervals passed since midnight
+        const fiveMinuteIntervalsSinceMidnight = Math.floor(
+          (currentHour * 60 + currentMinute) / 5
+        );
+
+        // Adjust the number of data points to match the expected count
+        timeseriesData.forEach((series) => {
+          // Start from the current total return for each fund
+          let currentValue;
+          if (series.id === "MARKET") {
+            currentValue = factorMetrics["MARKET"];
+          } else {
+            currentValue = fundMetrics[series.id].total;
+          }
+
+          // Calculate past data points starting at 12 AM
+          for (let i = fiveMinuteIntervalsSinceMidnight - 1; i >= 0; i--) {
+            series.data.unshift({
+              x: new Date(
+                currentTimestamp.setHours(0, i * 5, 0, 0)
+              ).toISOString(),
+              y: currentValue,
+            });
+
+            // Calculate the previous value by dividing by a float between 0.9 and 1.1
+            currentValue /= 1 + faker.number.float({ min: -0.1, max: 0.1 });
+          }
+        });
         setTsData(timeseriesData);
       }
     };
     fetchData();
-    const interval = setInterval(() => fetchData(), 150000); // Fetch every 2.5 min
+    const interval = setInterval(() => fetchData(), 300000); // Fetch every 5 min
     return () => {
       clearInterval(interval);
     };

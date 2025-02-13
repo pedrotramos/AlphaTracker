@@ -76,7 +76,7 @@ const LivePerformanceChart = (props) => {
         margin={{ top: 50, right: 50, bottom: 50, left: 75 }}
         xScale={{
           type: "time",
-          format: "%Y-%m-%dT%H:%M:%S.%f",
+          format: "%Y-%m-%dT%H:%M:%S.%LZ",
           precision: "millisecond",
         }}
         yScale={{

@@ -16,12 +16,9 @@ function App() {
           <Sidebar />
           <main className="content">
             <Routes>
-              <Route
-                path="market-watcher-client"
-                element={<LivePerformance />}
-              />
-              <Route path="market-watcher-client/stocks" element={<Stocks />} />
-              <Route path="/market-watcher-client/aum" element={<Aum />} />
+              <Route path="live" element={<LivePerformance />} />
+              <Route path="stocks" element={<Stocks />} />
+              <Route path="aum" element={<Aum />} />
             </Routes>
           </main>
         </div>

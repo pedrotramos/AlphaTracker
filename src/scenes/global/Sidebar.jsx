@@ -1,14 +1,13 @@
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import SavingsOutlinedIcon from "@mui/icons-material/SavingsOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 import SensorsOutlinedIcon from "@mui/icons-material/SensorsOutlined";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import { Menu, MenuItem, ProSidebar } from "react-pro-sidebar";
 import "react-pro-sidebar/dist/css/styles.css";
 import { Link } from "react-router-dom";
-import LogoDark from "../../assets/logo-dark.png";
-import LogoLight from "../../assets/logo-light.png";
 import { tokens } from "../../theme";
 
 const Item = ({ title, to, icon, selected, setSelected, setIsCollapsed }) => {
@@ -80,11 +79,8 @@ const Sidebar = () => {
                 alignItems="center"
                 ml="15px"
               >
-                {theme.palette.mode === "dark" ? (
-                  <img src={LogoDark} width="100px" alt="DAO Capital logo" />
-                ) : (
-                  <img src={LogoLight} width="100px" alt="DAO Capital logo" />
-                )}
+                <GpsFixedIcon />
+                <h1>AlphaTracker™</h1>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
                 </IconButton>
@@ -104,7 +100,7 @@ const Sidebar = () => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Live Performance"
-              to="/market-watcher-client"
+              to="/live"
               icon={<SensorsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -112,7 +108,7 @@ const Sidebar = () => {
             />
             <Item
               title="Stocks Information"
-              to="/market-watcher-client/stocks"
+              to="/stocks"
               icon={<CurrencyExchangeIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -120,7 +116,7 @@ const Sidebar = () => {
             />
             <Item
               title="AUM"
-              to="/market-watcher-client/aum"
+              to="/aum"
               icon={<SavingsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}

@@ -6,7 +6,7 @@ const FactorRadioChart = (props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  if (typeof props["data"] === "undefined") {
+  if (!props.data) {
     return (
       <Skeleton
         variant="rectangular"
@@ -18,9 +18,16 @@ const FactorRadioChart = (props) => {
   } else {
     return (
       <ResponsiveRadar
-        data={props["data"]["data"]}
-        keys={props["data"]["keys"]}
-        indexBy="factor"
+        data={Object.keys(props.data)
+          .filter((key) => key !== "ticker")
+          .map((dimension) => ({
+            dimension:
+              dimension.charAt(0).toUpperCase() +
+              dimension.slice(1).toLowerCase(),
+            [props.data.ticker]: props.data[dimension],
+          }))}
+        keys={[props.data.ticker]}
+        indexBy="dimension"
         theme={{
           axis: {
             ticks: {
@@ -36,7 +43,7 @@ const FactorRadioChart = (props) => {
           },
         }}
         valueFormat=">-.2f"
-        maxValue={15}
+        maxValue={10}
         margin={{ top: 70, right: 80, bottom: 40, left: 80 }}
         borderColor={{ from: "color" }}
         gridLabelOffset={36}

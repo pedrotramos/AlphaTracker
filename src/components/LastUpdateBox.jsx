@@ -1,8 +1,7 @@
 import { Box, Skeleton, Typography, useTheme } from "@mui/material";
 import { tokens } from "../theme";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import BloombergLogoLight from "../assets/bloomberg-logo-light.png";
-import BloombergLogoDark from "../assets/bloomberg-logo-dark.png";
+import FakerLogo from "../assets/faker-logo.png";
 
 const FundBox = ({ title, data }) => {
   const theme = useTheme();
@@ -68,19 +67,7 @@ const FundBox = ({ title, data }) => {
           padding="0 20px"
         >
           <Typography variant="h5">Powered by:</Typography>
-          {theme.palette.mode === "dark" ? (
-            <img
-              src={BloombergLogoDark}
-              alt="Bloomberg Logo"
-              height="25px"
-            ></img>
-          ) : (
-            <img
-              src={BloombergLogoLight}
-              alt="Bloomberg Logo"
-              height="25px"
-            ></img>
-          )}
+          <img src={FakerLogo} alt="Faker Logo" height="35px"></img>
         </Box>
       </Box>
     </Box>

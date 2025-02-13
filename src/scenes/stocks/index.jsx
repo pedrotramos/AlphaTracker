@@ -11,32 +11,7 @@ import { tokens } from "../../theme";
 import Header from "../global/Header";
 import { useState, useEffect } from "react";
 import AssetModal from "../../components/AssetModal";
-
-const url = process.env.REACT_APP_API_URL;
-const port = process.env.REACT_APP_API_PORT;
-const username = process.env.REACT_APP_API_AUTH_USERNAME;
-const password = process.env.REACT_APP_API_AUTH_PASSWORD;
-
-async function getFundFamilyNames() {
-  var credentials = btoa(username + ":" + password);
-  var auth = { Authorization: `Basic ${credentials}` };
-  var data = await fetch(url + ":" + port + "/fund-family-names", {
-    headers: auth,
-  }).then((res) => res.json());
-  return data;
-}
-
-async function getAssets(fund_name) {
-  var credentials = btoa(username + ":" + password);
-  var auth = { Authorization: `Basic ${credentials}` };
-  var data = await fetch(
-    url + ":" + port + "/assets?family_name=" + fund_name,
-    {
-      headers: auth,
-    }
-  ).then((res) => res.json());
-  return data;
-}
+import { faker } from "@faker-js/faker";
 
 function genTabs(fundNames) {
   var tabs = [];
@@ -66,15 +41,101 @@ const StocksPerformance = () => {
   };
   const handleTabChange = async (_, newTabIndex) => {
     setTabIndex(newTabIndex);
-    const data = await getAssets(fundNames[newTabIndex]);
+    const data = [];
     setAssetData(data);
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const fNames = await getFundFamilyNames();
+      const fNames = ["ROCKET", "SHIELD", "STAR"];
       setFundNames(fNames);
-      const aData = await getAssets(fNames[tabIndex]);
+      const tickers = [
+        "PETR4",
+        "VALE3",
+        "ITUB4",
+        "BBDC4",
+        "ABEV3",
+        "BBAS3",
+        "B3SA3",
+        "WEGE3",
+        "RENT3",
+        "ITSA4",
+        "JBSS3",
+        "GGBR4",
+        "ELET3",
+        "ELET6",
+        "SUZB3",
+        "CSAN3",
+        "RAIL3",
+        "VIVT3",
+        "BRFS3",
+        "BRKM5",
+        "HYPE3",
+        "LREN3",
+        "UGPA3",
+        "EQTL3",
+        "ENBR3",
+        "CPLE6",
+        "CMIG4",
+        "CCRO3",
+        "EMBR3",
+        "TIMS3",
+        "KLBN11",
+        "MRFG3",
+        "BRML3",
+        "MULT3",
+        "SBSP3",
+        "CSNA3",
+        "GOAU4",
+        "PRIO3",
+        "BRAP4",
+        "CRFB3",
+      ];
+
+      const aData = tickers.map((ticker, index) => {
+        const position = faker.helpers.arrayElement(["Long", "Short"]);
+        const currentPrice = faker.number.float({
+          min: 1,
+          max: 100,
+          precision: 0.01,
+        });
+        const returnPercentage = faker.number.float({
+          min: -0.05,
+          max: 0.05,
+          precision: 0.01,
+        });
+        let portfolioWeight = faker.number.float({
+          min: 0.5,
+          max: 5,
+          precision: 0.01,
+        });
+
+        // Adjust weight for short positions
+        if (position === "Short") {
+          portfolioWeight = -portfolioWeight;
+        }
+
+        return {
+          id: index + 1,
+          ticker,
+          position,
+          exchange: "B3",
+          price: currentPrice,
+          return: returnPercentage,
+          weight: portfolioWeight,
+          contribution: 0, // Initialize contribution to be calculated later
+        };
+      });
+
+      // Normalize weights to sum up to 100%
+      const totalAbsoluteWeight = aData.reduce(
+        (sum, asset) => sum + Math.abs(asset.weight),
+        0
+      );
+      aData.forEach((asset) => {
+        asset.weight = asset.weight / totalAbsoluteWeight;
+        asset.contribution = asset.return * asset.weight; // Calculate contribution after normalization
+      });
       setAssetData(aData);
     };
     fetchData();
