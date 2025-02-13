@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/AlphaTracker/static/css/main.873c1d22.css",
+    "main.js": "/AlphaTracker/static/js/main.d369a71c.js",
+    "index.html": "/AlphaTracker/index.html",
+    "main.873c1d22.css.map": "/AlphaTracker/static/css/main.873c1d22.css.map",
+    "main.d369a71c.js.map": "/AlphaTracker/static/js/main.d369a71c.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.873c1d22.css",
+    "static/js/main.d369a71c.js"
+  ]
+}
