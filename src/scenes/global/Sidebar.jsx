@@ -100,7 +100,7 @@ const Sidebar = () => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Live Performance"
-              to="/live"
+              to="/"
               icon={<SensorsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
