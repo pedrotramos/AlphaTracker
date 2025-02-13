@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/AlphaTracker/static/css/main.873c1d22.css",
-    "main.js": "/AlphaTracker/static/js/main.ad392a5e.js",
+    "main.js": "/AlphaTracker/static/js/main.4a9bcc6b.js",
     "index.html": "/AlphaTracker/index.html",
     "main.873c1d22.css.map": "/AlphaTracker/static/css/main.873c1d22.css.map",
-    "main.ad392a5e.js.map": "/AlphaTracker/static/js/main.ad392a5e.js.map"
+    "main.4a9bcc6b.js.map": "/AlphaTracker/static/js/main.4a9bcc6b.js.map"
   },
   "entrypoints": [
     "static/css/main.873c1d22.css",
-    "static/js/main.ad392a5e.js"
+    "static/js/main.4a9bcc6b.js"
   ]
 }
