@@ -100,7 +100,7 @@ const Sidebar = () => {
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
               title="Live Performance"
-              to="/"
+              to="/AlphaTracker"
               icon={<SensorsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -108,7 +108,7 @@ const Sidebar = () => {
             />
             <Item
               title="Stocks Information"
-              to="/stocks"
+              to="/AlphaTracker/stocks"
               icon={<CurrencyExchangeIcon />}
               selected={selected}
               setSelected={setSelected}
@@ -116,7 +116,7 @@ const Sidebar = () => {
             />
             <Item
               title="AUM"
-              to="/aum"
+              to="/AlphaTracker/aum"
               icon={<SavingsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
